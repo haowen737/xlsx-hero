@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Page Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <input
+      @change="uploadChange"
+      type="file"
+      name="xlsx"
+      accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+    >
+  </div>
+</body>
+<script>
+new Vue({
+  el: '#app',
+  methods: {
+    uploadChange: function(ev) {
+      console.log(ev.target.value)
+      this.send(ev.target)
+    },
+    send: function (target) {
+      console.log('target--', target)
+      axios.post('/upload', {
+        data: target
+      })
+    }
+  }
+})
+</script>
+</html>

@@ -1,2 +1,5 @@
 # xlsx-hero
-🎃Light weight xlsx reader || builder based on object schema
+🎃 XLSX import & export helper base on object schema in nodejs
+
+
+Example powered by [TypeScript Node Starter](https://github.com/Microsoft/TypeScript-Node-Starter)

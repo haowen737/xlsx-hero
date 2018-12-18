@@ -1,0 +1,53 @@
+{
+  "name": "xlsx-hero",
+  "version": "1.0.0",
+  "description": "A light weight xlsx reader || builder in nodejs",
+  "main": "index.js",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "test": "jest -u"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/test/jest.init.js"
+    ],
+    "testMatch": [
+      "<rootDir>/test/**.test.js"
+    ],
+    "testEnvironment": "node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haowen737/xlsx-hero.git"
+  },
+  "keywords": [
+    "node",
+    "xlsx"
+  ],
+  "author": "Haowen <haowen737@gmail.com>",
+  "license": "Apache",
+  "bugs": {
+    "url": "https://github.com/haowen737/xlsx-hero/issues"
+  },
+  "homepage": "https://github.com/haowen737/xlsx-hero#readme",
+  "devDependencies": {
+    "@types/lodash": "^4.14.119",
+    "babel-polyfill": "^6.26.0",
+    "jest": "^23.6.0",
+    "koa": "^2.6.2",
+    "koa-multer": "^1.0.2",
+    "koa-router": "^7.4.0",
+    "regenerator-runtime": "^0.13.1",
+    "supertest": "^3.3.0",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "async-validator": "^1.10.0",
+    "lodash": "^4.17.11",
+    "node-xlsx": "^0.12.1"
+  }
+}
