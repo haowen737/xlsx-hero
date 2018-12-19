@@ -1,4 +1,4 @@
-import av from 'async-validator'
+import asv from 'async-validator'
 
 interface Descriptor {
   [key: string]: any[]
@@ -7,15 +7,15 @@ interface Descriptor {
 export default class Validator {
 
   private descriptor: Descriptor
-  private av: any
+  private asv: any
   constructor(
     columns: any[]
   ) {
     this.descriptor = {}
-    this.createAv(columns)
+    this.createasv(columns)
   }
 
-  private createAv(columns: any[]) {
+  private createasv(columns: any[]) {
     for (let i = 0; i < columns.length; i++) {
       const column = columns[i]
       const { key, rules } = column
@@ -24,10 +24,10 @@ export default class Validator {
         this.descriptor[key] = rules
       }
     }
-    this.av = new av(this.descriptor)
+    this.asv = new asv(this.descriptor)
   }
 
   public validate(row: XlsxCell[], opt: any, callback: any): void {
-    return this.av.validate(row, opt, callback)
+    return this.asv.validate(row, opt, callback)
   }
 }

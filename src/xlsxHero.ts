@@ -1,6 +1,7 @@
 import xlsx from 'node-xlsx'
 import { isEmpty } from 'lodash'
 import Validator from './validator'
+import { Err } from './errors'
 
 // import logger from './logger'
 // import { GatewayError } from '../util'
@@ -140,7 +141,7 @@ export default class XlsxHero {
    * @memberof XlsxHero
    */
   private async validate(file: any) {
-    if (!file) { throw new Error('未发现文件，请检查是否文件类型是否正确') }
+    if (!file) { throw Err('未发现文件，请检查是否文件类型是否正确') }
 
     const start = new Date()
     const sheet = xlsx.parse(file.buffer, { raw: false })[0]
@@ -150,8 +151,8 @@ export default class XlsxHero {
     const datasCount = datas.length
     const max = this.maxlength
 
-    if (datasCount < 1) { throw new Error('导入失败，上传的似乎是个空表格') }
-    if (max && datasCount > max) { throw new Error(`导入失败，上传表格行数最多为${max}条`) }
+    if (datasCount < 1) { throw Err('导入失败，上传的似乎是个空表格') }
+    if (max && datasCount > max) { throw Err(`导入失败，上传表格行数最多为${max}条`) }
 
     // const validator = new av(this.descriptor)
     const cleanData: XlsxCell[] = []
@@ -176,7 +177,7 @@ export default class XlsxHero {
     }
 
     if (!isEmpty(this.errs)) {
-      throw new Error(this.errs)
+      throw Err(JSON.stringify(this.errs))
     }
 
     // logger.info(`xlsx hero get all validated total length ${datasCount}, cost ${new Date() - start}`)
@@ -213,7 +214,7 @@ export default class XlsxHero {
       return {}
     }
     if (isEmpty(content) && !this.allowEmpty) {
-      throw new Error(`第${index + 2}行为空`)
+      throw Err(`第${index + 2}行为空`)
     }
     const columns = this.columns
     const row: any = {}
@@ -278,7 +279,7 @@ export default class XlsxHero {
    */
   private handleErrors(err: Error, i: number) {
     if (this.first) { // 第一个校验失败就抛出
-      throw new Error(
+      throw Err(
         JSON.stringify([this.wrapError(err, i)])
       )
     }
