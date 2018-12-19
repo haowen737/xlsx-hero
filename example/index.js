@@ -29,10 +29,7 @@ router.post('/upload', upload.any(), async (ctx) => {
   const hero = new XlsxHero(schema)
   const data = await hero.validate(file)
 
-  ctx.body = {
-    list: data,
-    detail: { cost: 1 }
-  }
+  ctx.body = data
 })
 
 app

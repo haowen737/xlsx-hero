@@ -1,7 +1,7 @@
 
-interface XlsxCell {
+interface XlsxRow {
   backfill: object
-  backfillList: object[]
+  backfillList: (() => object)[]
 }
 
 interface XlsxHeroProps {
@@ -11,4 +11,13 @@ interface XlsxHeroProps {
   rowAppend: any
   columns: any
   allowEmpty: boolean
+}
+
+interface AbstractProcessResult {
+  cost?: number
+}
+
+interface ValidateResult {
+  data: XlsxRow[] | []
+  detail: AbstractProcessResult | void
 }

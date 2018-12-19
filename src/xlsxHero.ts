@@ -72,35 +72,19 @@ export default class XlsxHero {
     this.columns = columns || []
     this.keys = columns.map(s => s.key)
     this.header = columns.map(s => s.title)
-    this.validator = new Validator(columns)
+    this.validator = new Validator(columns, first)
     // this.buildDescriptor()
   }
-
-  // TODO: remove later
-  // /**
-  //  * 生成async-validator所需的descriptor
-  //  */
-  // buildDescriptor(): void {
-  //   const columns = this.columns
-  //   for (let i = 0; i < columns.length; i++) {
-  //     const column = columns[i]
-  //     const { key, rules } = column
-
-  //     if (rules) {
-  //       this.descriptor[key] = rules
-  //     }
-  //   }
-  // }
 
   /**
    * 生成buffer或sheet数组
    *
    * @param {*} [data=[]]
    * @param {boolean} [raw=false]
-   * @returns {(XlsxCell[][] | any[])}
+   * @returns {(XlsxRow[] | any[])}
    * @memberof XlsxHero
    */
-  public generateSheet(data = [], raw = false): XlsxCell[][] | any[] {
+  public generateSheet(data = [], raw = false): XlsxRow[] | any[] {
     const sheet = [this.header]
     for (let i = 0; i < data.length; i++) {
       const el = data[i]
@@ -140,7 +124,7 @@ export default class XlsxHero {
    * @param {*} data
    * @memberof XlsxHero
    */
-  private async validate(file: any) {
+  public async validate<T>(file: any): Promise<ValidateResult> {
     if (!file) { throw Err('未发现文件，请检查是否文件类型是否正确') }
 
     const start = new Date()
@@ -155,24 +139,25 @@ export default class XlsxHero {
     if (max && datasCount > max) { throw Err(`导入失败，上传表格行数最多为${max}条`) }
 
     // const validator = new av(this.descriptor)
-    const cleanData: XlsxCell[] = []
+    const validatedData: XlsxRow[] = []
+    const validateStart = new Date()
     for (let i = 0; i < datasCount; i++) {
-      const rowStart = new Date()
-      const row = this.makeRow(datas[i], i)
+      const validateRowStart = new Date()
+      const dirtyRow = this.makeRow(datas[i], i)
 
       // 按 每1行 进行校验
-      // 空的行将在不会进行校验 && 不会被push至cleanData
-      if (!isEmpty(row)) {
-        await this.validateRow(row, i, datasCount)
-        .then(async () => {
-          cleanData.push(
-            await this.backfill(row)
-          )
-        })
-        .catch((err) => {
-          this.handleErrors(err, i)// 收集错误，如果first===true，将会直接抛出
-        })
-        // logger.info(`xlsx hero validate row ${i}, total length ${datasCount}, cost ${new Date() - rowStart}`)
+      // 空的行将在不会进行校验 && 不会被push至validatedData
+      if (!isEmpty(dirtyRow)) {
+        await this.validator.validateRow(dirtyRow, i, datasCount)
+          .then(async () => {
+            validatedData.push(
+              await this.backfill(dirtyRow)
+            )
+          })
+          .catch((err) => {
+            this.handleErrors(err, i)// 收集错误，如果first===true，将会直接抛出
+          })
+        // logger.info(`xlsx hero validate row ${i}, total length ${datasCount}, cost ${new Date() - validateStart}`)
       }
     }
 
@@ -182,24 +167,10 @@ export default class XlsxHero {
 
     // logger.info(`xlsx hero get all validated total length ${datasCount}, cost ${new Date() - start}`)
 
-    return cleanData
+    return { data: validatedData, detail: {
+      cost: new Date().getTime() - validateStart.getTime()
+    }}
   }
-
-  /**
-   * 校验每一行，promise包装validator.validator
-   *
-   * @param {*} data
-   * @memberof XlsxHero
-   */
-  validateRow = (row: XlsxCell[], i: number, datasCount: number) => new Promise((resolve, reject) => {
-    this.validator.validate(row, { first: this.first }, (err: Error, fields: any) => {
-      if (!err) {
-        resolve()
-      } else {
-        reject(err)
-      }
-    })
-  })
 
   /**
    * 格式化excel一行 - 以进行校验
@@ -209,7 +180,7 @@ export default class XlsxHero {
    * @returns
    * @memberof XlsxHero
    */
-  makeRow<T>(content: XlsxCell[] | any[], index: number): T | any {
+  makeRow<T>(content: XlsxRow[] | any[], index: number): T | any {
     if (isEmpty(content) && this.allowEmpty) {
       return {}
     }
@@ -225,7 +196,7 @@ export default class XlsxHero {
       const field = columns[i]
 
       if (!field) {
-        return {}
+        continue
       }
 
       // if (!cell) {
@@ -253,7 +224,7 @@ export default class XlsxHero {
   /**
    * 回填需要包装的key
    */
-  async backfill <T>(row: any): Promise<T> {
+  private async backfill (row: XlsxRow): Promise<XlsxRow> {
     const { backfillList } = row
 
     for (let i = 0; i < backfillList.length; i++) {
@@ -288,7 +259,7 @@ export default class XlsxHero {
     )
   }
 
-  wrapError = (err: Error, i: number) => ({
+  private wrapError = (err: Error, i: number) => ({
     row: i,
     content: err
   })

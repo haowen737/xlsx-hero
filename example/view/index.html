@@ -19,9 +19,9 @@
       id="file"
       accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
     >
-    <div>validate xlsx cost: </div>
+    <div class="summary">validate xlsx cost: {{detail.cost || '??'}} ms</div>
     <ul>
-      <li v-for="(it, i) in list">{{i}} - {{it}}</li>
+      <li v-for="(it, i) in list">{{i}}&nbsp;&nbsp;{{it}}</li>
     </ul>
   </div>
 </body>
@@ -30,7 +30,8 @@ new Vue({
   el: '#app',
   data: function () {
     return {
-      list: []
+      list: [],
+      detail: {}
     }
   },
   methods: {
@@ -44,8 +45,9 @@ new Vue({
     send: function (data) {
       axios
         .post('/upload', data)
-        .then(({ data }) => {
-          this.list = data.list || []
+        .then(({ data: response }) => {
+          this.list = response.data || []
+          this.detail = response.detail || {}
           console.log('res--', res)
         })
 
