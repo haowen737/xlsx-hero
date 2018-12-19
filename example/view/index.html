@@ -7,30 +7,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="./index.css">
 </head>
 <body>
   <div id="app">
+    <h1>Hello! XlsxHero Example</h1>
     <input
       @change="uploadChange"
       type="file"
       name="xlsx"
+      id="file"
       accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
     >
+    <div>validate xlsx cost: </div>
+    <ul>
+      <li v-for="(it, i) in list">{{i}} - {{it}}</li>
+    </ul>
   </div>
 </body>
 <script>
 new Vue({
   el: '#app',
+  data: function () {
+    return {
+      list: []
+    }
+  },
   methods: {
     uploadChange: function(ev) {
-      console.log(ev.target.value)
-      this.send(ev.target)
+      const file = ev.target.files[0]
+      const data = new FormData();
+      data.append('file', file);
+
+      this.send(data)
     },
-    send: function (target) {
-      console.log('target--', target)
-      axios.post('/upload', {
-        data: target
-      })
+    send: function (data) {
+      axios
+        .post('/upload', data)
+        .then(({ data }) => {
+          this.list = data.list || []
+          console.log('res--', res)
+        })
+
     }
   }
 })
