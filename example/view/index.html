@@ -6,7 +6,6 @@
   <title>Page Title</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <link rel="stylesheet" href="./index.css">
 </head>
 <body>
@@ -19,7 +18,8 @@
       id="file"
       accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
     >
-    <div class="summary">validate xlsx cost: {{detail.cost || '??'}} ms</div>
+    <div class="summary">validate xlsx cost: {{detail || '??'}} ms</div>
+    <div class="summary">err: {{errs}}</div>
     <ul>
       <li v-for="(it, i) in list">{{i}}&nbsp;&nbsp;{{it}}</li>
     </ul>
@@ -31,27 +31,29 @@ new Vue({
   data: function () {
     return {
       list: [],
-      detail: {}
+      detail: {},
+      errs: null
     }
   },
   methods: {
     uploadChange: function(ev) {
       const file = ev.target.files[0]
-      const data = new FormData();
-      data.append('file', file);
+      const data = new FormData()
+      data.append('file', file)
 
-      this.send(data)
-    },
-    send: function (data) {
-      axios
-        .post('/upload', data)
-        .then(({ data: response }) => {
-          this.list = response.data || []
-          this.detail = response.detail || {}
-          console.log('res--', res)
+      fetch('/upload', { method: 'POST', body: data })
+        .then(res => res.json())
+        .then((res) => {
+          const { data, detail, msg } = res
+          this.list = data || []
+          this.detail = detail || {}
+          this.errs = msg
+        })
+        .catch(err => {
+          console.log(err)
         })
 
-    }
+    },
   }
 })
 </script>

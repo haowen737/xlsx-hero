@@ -24,12 +24,16 @@ const schema = {
 }
 
 router.post('/upload', upload.any(), async (ctx) => {
-  const { req } = ctx
-  const file = req.files[0]
-  const hero = new XlsxHero(schema)
-  const data = await hero.validate(file)
-
-  ctx.body = data
+  try {
+    const { req } = ctx
+    const file = req.files[0]
+    const hero = new XlsxHero(schema)
+    const data = await hero.validate(file)
+    ctx.body = data
+  } catch(err) {
+    ctx.status = 400 
+    ctx.body = { msg: err.message }
+  }
 })
 
 app

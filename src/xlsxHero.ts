@@ -53,6 +53,7 @@ export default class XlsxHero {
     maxlength,
     first,
     rowAppend,
+    needBackFill,
     columns,
     allowEmpty = true,
   }: XlsxHeroProps) {
@@ -61,7 +62,7 @@ export default class XlsxHero {
     }
 
     this.allowEmpty = allowEmpty
-    this.needBackFill = false// 需要回填
+    this.needBackFill = needBackFill || false// 需要回填
     this.errs = []// 校验错误收集
     this.rowAppend = rowAppend// 需要添加到每一个dto内的键值对
     this.first = first
@@ -125,10 +126,11 @@ export default class XlsxHero {
   public async validate<T>(file: any): Promise<ValidateResult> {
     if (!file) { throw Err('未发现文件，请检查是否文件类型是否正确') }
 
-    const start = new Date()
+    const parseStart = new Date()
     const sheet = xlsx.parse(file.buffer, { raw: false })[0]
     const datas = sheet.data
     datas.shift()// 剔除表头
+    const parseEnd = new Date()
 
     const datasCount = datas.length
     const max = this.maxlength
@@ -165,7 +167,8 @@ export default class XlsxHero {
     // logger.info(`xlsx hero get all validated total length ${datasCount}, cost ${new Date() - start}`)
 
     return { data: validatedData, detail: {
-      cost: new Date().getTime() - validateStart.getTime()
+      validateCost: new Date().getTime() - validateStart.getTime(),
+      parseCost: parseEnd.getTime() - parseStart.getTime()
     }}
   }
 

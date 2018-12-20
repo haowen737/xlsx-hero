@@ -9,12 +9,14 @@ interface XlsxHeroProps {
   maxlength: any
   first: boolean
   rowAppend: any
+  needBackFill: boolean
   columns: any
   allowEmpty: boolean
 }
 
 interface AbstractProcessResult {
-  cost?: number
+  validateCost?: number
+  parseCost?: number
 }
 
 interface ValidateResult {
