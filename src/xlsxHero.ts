@@ -32,9 +32,8 @@ export default class XlsxHero {
   private first: boolean
   private maxlength: any
   private name: any
-  private descriptor: any
   private columns: any
-  private keys: any
+  // private keys: any
   private header: any
   private validator: Validator
 
@@ -68,23 +67,22 @@ export default class XlsxHero {
     this.first = first
     this.maxlength = maxlength
     this.name = name
-    this.descriptor = {}
     this.columns = columns || []
-    this.keys = columns.map(s => s.key)
+    // this.keys = columns.map(s => s.key)
     this.header = columns.map(s => s.title)
     this.validator = new Validator(columns, first)
-    // this.buildDescriptor()
   }
 
   /**
    * 生成buffer或sheet数组
    *
    * @param {*} [data=[]]
-   * @param {boolean} [raw=false]
+   * @param {*} [opts={}]
    * @returns {(XlsxRow[] | any[])}
    * @memberof XlsxHero
    */
-  public generateSheet(data = [], raw = false): XlsxRow[] | any[] {
+  public generateSheet(data = [], opts: GenerateOpt = {}): XlsxRow[] | any[] {
+    const { raw = false } = opts
     const sheet = [this.header]
     for (let i = 0; i < data.length; i++) {
       const el = data[i]
@@ -138,7 +136,6 @@ export default class XlsxHero {
     if (datasCount < 1) { throw Err('导入失败，上传的似乎是个空表格') }
     if (max && datasCount > max) { throw Err(`导入失败，上传表格行数最多为${max}条`) }
 
-    // const validator = new av(this.descriptor)
     const validatedData: XlsxRow[] = []
     const validateStart = new Date()
     for (let i = 0; i < datasCount; i++) {
@@ -211,7 +208,8 @@ export default class XlsxHero {
       // if (!this.needBackFill && backfill) { this.needBackFill = true }
       Object.assign(row, { [key]: cell })
 
-      if (backfill) {
+      // 在schema中指定需要backfill才会调用每一个单元格的backfill方法
+      if (this.needBackFill && backfill) {
         row.backfillList.push(
           () => backfill(cell)
         )

@@ -21,3 +21,7 @@ interface ValidateResult {
   data: XlsxRow[] | []
   detail: AbstractProcessResult | void
 }
+
+interface GenerateOpt {
+  raw?: boolean
+}
