@@ -104,6 +104,9 @@ npm i
 node index.js
 ```
 Then open http://localhost:3008/
+
 *(For server: Make sure you have node v7.6.0 or higher installed for ES2015 and async function support)*
+
 *(For client: Make sure your browser support Fetch & Promise && DO NOT USE IE8 OR BELOW)*
+
 Enjoy :)
