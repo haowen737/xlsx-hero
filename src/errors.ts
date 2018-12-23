@@ -1,19 +1,15 @@
 interface ErrConstructor {
-  new(message?: string): Error
   (message?: string): Error
   readonly prototype: Error
+  new(message?: string): Error
 }
-
-export interface Err extends Error {
-}
-
 
 class XlsxHeroErr extends Error {
   public isXlsxHero: boolean
   constructor(msg: string) {
     super(msg)
     this.isXlsxHero = true
-    this.name = 'xlsxHeroError'
+    this.name = "xlsxHeroError"
   }
 }
 

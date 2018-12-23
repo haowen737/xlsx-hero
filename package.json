@@ -1,6 +1,6 @@
 {
   "name": "xlsx-hero",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A light weight xlsx reader || builder in nodejs",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "npm run build:types && npm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "test": "jest -u --detectOpenHandles"
+    "test": "jest -u --detectOpenHandles",
+    "lint": "tslint -c tslint.json -p ./ --fix"
   },
   "jest": {
     "setupFiles": [
@@ -43,6 +44,7 @@
     "koa-router": "^7.4.0",
     "regenerator-runtime": "^0.13.1",
     "supertest": "^3.3.0",
+    "tslint": "^5.12.0",
     "typescript": "^3.2.2"
   },
   "dependencies": {

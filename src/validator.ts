@@ -1,4 +1,4 @@
-import asv from 'async-validator'
+import asv from "async-validator"
 
 interface Descriptor {
   [key: string]: any[]
@@ -12,23 +12,11 @@ export default class Validator {
 
   constructor(
     columns: any[],
-    first?: boolean
+    first?: boolean,
   ) {
     this.descriptor = {}
     this.first = first
     this.createasv(columns)
-  }
-
-  private createasv(columns: any[]) {
-    for (let i = 0; i < columns.length; i++) {
-      const column = columns[i]
-      const { key, rules } = column
-
-      if (rules) {
-        this.descriptor[key] = rules
-      }
-    }
-    this.asv = new asv(this.descriptor)
   }
 
   public validate(row: XlsxRow, opt: any, callback: any): void {
@@ -44,7 +32,7 @@ export default class Validator {
    * @returns
    * @memberof Validator
    */
-  public validateRow (row: XlsxRow, i: number, datasCount: number): Promise<void> {
+  public validateRow(row: XlsxRow, i: number, datasCount: number): Promise<void> {
     return new Promise((resolve, reject) => {
       this.validate(row, { first: this.first }, (err: Error, fields: any) => {
         if (!err) {
@@ -54,5 +42,15 @@ export default class Validator {
         }
       })
     })
+  }
+
+  private createasv(columns: any[]) {
+    for (const column of columns) {
+      const { key, rules } = column
+      if (rules) {
+        this.descriptor[key] = rules
+      }
+    }
+    this.asv = new asv(this.descriptor)
   }
 }
