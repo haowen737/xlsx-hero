@@ -1,6 +1,6 @@
 {
   "name": "xlsx-hero",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A light weight xlsx reader || builder in nodejs",
   "main": "lib/index.js",
   "files": [
