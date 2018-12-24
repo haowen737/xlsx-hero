@@ -2,7 +2,10 @@
   "name": "xlsx-hero",
   "version": "0.0.1",
   "description": "A light weight xlsx reader || builder in nodejs",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "type-check": "tsc",
     "type-check:watch": "npm run type-check -- --watch",
