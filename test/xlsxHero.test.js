@@ -9,6 +9,7 @@ const Router = require('koa-router')
 const XlsxHero = require('../lib/xlsxHero').default
 
 const TEST_FILE_PATH = path.join(__dirname, './test.xlsx')
+const TEST_PATTERN_FILE_PATH = path.join(__dirname, '.excel/test.pattern.xlsx')
 const testSchema = {
   name: '测试模板',
   maxlength: 1000,
@@ -46,6 +47,18 @@ const ColumsForBackfill = [
   }
 ]
 
+const ColumsForValidateByPattern = function() {
+  return [
+    {
+      title: '姓名', key: 'name'
+    }, {
+      title: 'email', key: 'email', rules: [{
+        pattern: XlsxHero.pattern.email
+      }]
+    }
+  ]
+}
+
 // afterAll(() => setTimeout(() => process.exit(0), 1000))
 
 describe('xlsxHero', () => {
@@ -58,7 +71,7 @@ describe('xlsxHero', () => {
     router.post('/', upload.any(), (ctx) => {
       const file = ctx.req.files ? ctx.req.files[0] : null
       const hero = new XlsxHero(testSchema)
-      expect(hero.validate(file)).resolves.toHaveLength(2)
+      expect(hero.validate(file)).resolves.toHaveProperty('data')
       server.close()
     })
     app.use(router.routes())
@@ -100,17 +113,35 @@ describe('xlsxHero', () => {
   //   expect(result.name).toMatch(name)
   // })
 
+  test('can validate field by pattern', async () => {
+    const schema = Object.assign({}, testSchema, {
+      first: true,
+      columns: ColumsForValidate
+    })
+    const hero = new XlsxHero(ColumsForValidateByPattern)
+    const file = fs.readFileSync(TEST_FILE_PATH)
+    try {
+      await hero.validate({ buffer: file })
+    } catch (err) {
+      const { message } = err
+      expect(JSON.parse(message)).toMatchObject(
+        [{content: [{field: 'platformId', message: 'test error'}], row: 0}]
+      )
+    }
+  })
+
   test('can validate field and return in first error', async () => {
     const schema = Object.assign({}, testSchema, {
       first: true,
       columns: ColumsForValidate
     })
     const hero = new XlsxHero(schema)
-    const file = fs.readFileSync(TEST_FILE_PATH)
+    const file = fs.readFileSync(TEST_PATTERN_FILE_PATH)
     try {
       await hero.validate({ buffer: file })
     } catch (err) {
       const { message } = err
+      console.log('message---', message)
       expect(JSON.parse(message)).toMatchObject(
         [{content: [{field: 'platformId', message: 'test error'}], row: 0}]
       )

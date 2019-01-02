@@ -1,5 +1,7 @@
 import { isEmpty } from "lodash"
 import xlsx from "node-xlsx"
+import asv from "async-validator"
+
 import { Err } from "./errors"
 import Validator from "./validator"
 
@@ -37,6 +39,7 @@ export default class XlsxHero {
   private header: any
   private validator: Validator
 
+  static pattern: any = asv.pattern
   /**
    * Creates an instance of XlsxHero.
    * @param {*} {
