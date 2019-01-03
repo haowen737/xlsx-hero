@@ -1,6 +1,6 @@
 import { isEmpty } from "lodash"
 import xlsx from "node-xlsx"
-import asv from "async-validator"
+import * as asv from "async-validator"
 
 import { Err } from "./errors"
 import Validator from "./validator"

@@ -5,11 +5,11 @@ const fs = require('fs')
 const path = require('path')
 const multer = require('koa-multer')
 const Router = require('koa-router')
+const http = require('http')
 
 const XlsxHero = require('../lib/xlsxHero').default
-
 const TEST_FILE_PATH = path.join(__dirname, './test.xlsx')
-const TEST_PATTERN_FILE_PATH = path.join(__dirname, '.excel/test.pattern.xlsx')
+const TEST_PATTERN_FILE_PATH = path.join(__dirname, './excel/test.pattern.xlsx')
 const testSchema = {
   name: '测试模板',
   maxlength: 1000,
@@ -47,37 +47,40 @@ const ColumsForBackfill = [
   }
 ]
 
-const ColumsForValidateByPattern = function() {
-  return [
-    {
-      title: '姓名', key: 'name'
-    }, {
-      title: 'email', key: 'email', rules: [{
-        pattern: XlsxHero.pattern.email
-      }]
-    }
-  ]
-}
+const ColumsForValidateByPattern = [
+  {
+    title: '姓名', key: 'name'
+  }, {
+    title: 'email', key: 'email', rules: [{
+      type: 'email'
+    }]
+  }
+]
+
 
 // afterAll(() => setTimeout(() => process.exit(0), 1000))
 
 describe('xlsxHero', () => {
 
-  test('can read file from request', async () => {
+  it('can read file from request', async (done) => {
     const app = new Koa()
     const router = new Router()
     const upload = multer()
     const server = app.listen()
-    router.post('/', upload.any(), (ctx) => {
+    router.post('/', upload.any(), async (ctx) => {
       const file = ctx.req.files ? ctx.req.files[0] : null
       const hero = new XlsxHero(testSchema)
-      expect(hero.validate(file)).resolves.toHaveProperty('data')
-      server.close()
+      const result = await hero.validate(file)
+      ctx.body = result
     })
     app.use(router.routes())
-    await request(server)
+    const result = await request(server)
       .post('/')
-      .attach('file', TEST_FILE_PATH)
+      .attach('file', TEST_PATTERN_FILE_PATH)
+
+    expect(result.body.data).toHaveLength(2)
+    server.close()
+    done()
   })
 
   test('can build template in raw', () => {
@@ -100,7 +103,7 @@ describe('xlsxHero', () => {
       [ 2, 2, 'shop2' ]
     ]
     const hero = new XlsxHero(testSchema)
-    const result = await hero.generateSheet(source, true)
+    const result = await hero.generateSheet(source, { raw: true })
     expect(result).toMatchObject(match)
   })
 
@@ -116,16 +119,16 @@ describe('xlsxHero', () => {
   test('can validate field by pattern', async () => {
     const schema = Object.assign({}, testSchema, {
       first: true,
-      columns: ColumsForValidate
+      columns: ColumsForValidateByPattern
     })
-    const hero = new XlsxHero(ColumsForValidateByPattern)
-    const file = fs.readFileSync(TEST_FILE_PATH)
+    const hero = new XlsxHero(schema)
+    const file = fs.readFileSync(TEST_PATTERN_FILE_PATH)
     try {
       await hero.validate({ buffer: file })
     } catch (err) {
       const { message } = err
       expect(JSON.parse(message)).toMatchObject(
-        [{content: [{field: 'platformId', message: 'test error'}], row: 0}]
+        [{"content": [{"field": "email", "message": "email is not a valid email"}], "row": 0}]
       )
     }
   })
@@ -141,7 +144,6 @@ describe('xlsxHero', () => {
       await hero.validate({ buffer: file })
     } catch (err) {
       const { message } = err
-      console.log('message---', message)
       expect(JSON.parse(message)).toMatchObject(
         [{content: [{field: 'platformId', message: 'test error'}], row: 0}]
       )
@@ -203,13 +205,14 @@ describe('xlsxHero', () => {
   test('can use backfill to field', async () => {
     const schema = Object.assign({}, testSchema, {
       first: true,
+      needBackFill: true,
       columns: ColumsForBackfill
     })
     const hero = new XlsxHero(schema)
     const file = fs.readFileSync(TEST_FILE_PATH)
-    const result = await hero.validate({ buffer: file })
-    expect(result[0]).toHaveProperty('backfilled', true)
-    expect(result[1]).toHaveProperty('backfilled', true)
+    const { data } = await hero.validate({ buffer: file })
+    expect(data[0]).toHaveProperty('backfilled', true)
+    expect(data[1]).toHaveProperty('backfilled', true)
   })
 
   test('can append rowAppend to each row', async () => {
@@ -221,9 +224,9 @@ describe('xlsxHero', () => {
     })
     const hero = new XlsxHero(schema)
     const file = fs.readFileSync(TEST_FILE_PATH)
-    const result = await hero.validate({ buffer: file })
-    expect(result[0]).toHaveProperty('appenedKey', 'appenedValue')
-    expect(result[1]).toHaveProperty('appenedKey', 'appenedValue')
+    const { data } = await hero.validate({ buffer: file })
+    expect(data[0]).toHaveProperty('appenedKey', 'appenedValue')
+    expect(data[1]).toHaveProperty('appenedKey', 'appenedValue')
   })
 
   test('throw an error if empty row exist', async () => {
