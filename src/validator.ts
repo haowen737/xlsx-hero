@@ -1,8 +1,10 @@
 import asv from "async-validator"
+import debug from 'debug'
 
 interface Descriptor {
   [key: string]: any[]
 }
+const DEBUG = debug('xlsx-hero:validator')
 
 export default class Validator {
 
@@ -17,6 +19,7 @@ export default class Validator {
     this.descriptor = {}
     this.first = first
     this.createasv(columns)
+    DEBUG('validator created')
   }
 
   public validate(row: XlsxRow, opt: any, callback: any): void {

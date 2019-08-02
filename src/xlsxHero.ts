@@ -1,12 +1,15 @@
 import { isEmpty } from "lodash"
 import xlsx from "node-xlsx"
 import * as asv from "async-validator"
+import debug from 'debug'
 
 import { Err } from "./errors"
 import Validator from "./validator"
 
 // import logger from './logger'
 // import { GatewayError } from '../util'
+
+const DEBUG = debug('xlsx-hero')
 
 /**
  *  interface Column {
@@ -75,6 +78,8 @@ export default class XlsxHero {
     // this.keys = columns.map(s => s.key)
     this.header = columns.map((s) => s.title)
     this.validator = new Validator(columns, first)
+
+    DEBUG('xlsx hero created')
   }
 
   /**

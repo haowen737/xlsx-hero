@@ -1,0 +1,2 @@
+const bench = require('benchmark')
+
