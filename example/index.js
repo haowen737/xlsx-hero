@@ -37,6 +37,21 @@ router.post('/upload', upload.any(), async (ctx) => {
   }
 })
 
+router.post('/upload/smooth', upload.any(), async (ctx) => {
+  try {
+    const { req } = ctx
+    const file = req.files[0]
+    const hero = new XlsxHero(schema)
+
+    const data = await hero.smoothRead(file.buffer)
+    ctx.body = data
+  } catch(err) {
+    ctx.status = 400 
+    console.log(err)
+    ctx.body = { msg: err.message }
+  }
+})
+
 app
   .use(router.routes())
   .use(router.allowedMethods())

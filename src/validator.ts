@@ -4,6 +4,7 @@ import debug from 'debug'
 interface Descriptor {
   [key: string]: any[]
 }
+
 const DEBUG = debug('xlsx-hero:validator')
 
 export default class Validator {
@@ -11,6 +12,7 @@ export default class Validator {
   private descriptor: Descriptor
   private asv: any
   private first?: boolean
+  private concurrentLimit: number
 
   constructor(
     columns: any[],
@@ -19,7 +21,18 @@ export default class Validator {
     this.descriptor = {}
     this.first = first
     this.createasv(columns)
+    this.concurrentLimit = 10
     DEBUG('validator created')
+  }
+
+  /**
+   * TODO: 分批校验，起10个线程
+   * 或者可以将 新建worker数量交给用户？🤔
+   * @memberof Validator
+   */
+  public async smoothValidate(data: any[]) {
+    const tasksLength = data.length
+
   }
 
   public validate(row: XlsxRow, opt: any, callback: any): void {

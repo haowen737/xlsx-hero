@@ -15,9 +15,16 @@
       @change="uploadChange"
       type="file"
       name="xlsx"
-      id="file"
+      id="file1"
       accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
-    >
+    >上传</input>
+    <input
+      @change="smoothRead"
+      type="file"
+      name="xlsx"
+      id="file2"
+      accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+    >新上传</input>
     <div class="summary">validate xlsx cost: {{detail || '??'}} ms</div>
     <div class="summary">err: {{errs}}</div>
     <ul>
@@ -38,10 +45,17 @@ new Vue({
   methods: {
     uploadChange: function(ev) {
       const file = ev.target.files[0]
+      this.send('/upload', file)
+    },
+    smoothRead: function(ev) {
+      const file = ev.target.files[0]
+      this.send('/upload/smooth', file)
+    },
+    send: function(path, file) {
       const data = new FormData()
       data.append('file', file)
 
-      fetch('/upload', { method: 'POST', body: data })
+      fetch(path, { method: 'POST', body: data })
         .then(res => res.json())
         .then((res) => {
           const { data, detail, msg } = res
@@ -52,8 +66,7 @@ new Vue({
         .catch(err => {
           console.log(err)
         })
-
-    },
+    }
   }
 })
 </script>

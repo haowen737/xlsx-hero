@@ -5,6 +5,7 @@ import debug from 'debug'
 
 import { Err } from "./errors"
 import Validator from "./validator"
+import { reader } from './bufferReader'
 
 // import logger from './logger'
 // import { GatewayError } from '../util'
@@ -124,6 +125,31 @@ export default class XlsxHero {
   public buildTemplate(name = "untitled") {
     const data = xlsx.build([{ name, data: [this.header] }])
     return { fileName: `${name}.xlsx`, data }
+  }
+
+  /**
+   * TODO:
+   * 1. 重新命名这个方法
+   * 2. 接入validator
+   * 3. 子线程返回校验结果
+   *
+   * @param {Buffer} buffer
+   * @returns {Promise<void>}
+   * @memberof XlsxHero
+   */
+  public async smoothRead(buffer: Buffer): Promise<void> {
+    const r = reader({
+      onMessage: (data) => {
+        console.log('onMessage', data)
+      },
+      onError: (data) => {
+        console.log('onError', data)
+      },
+      onExit: (data) => {
+        console.log('onExit', data)
+      },
+    })
+    await r(buffer)
   }
 
   /**
